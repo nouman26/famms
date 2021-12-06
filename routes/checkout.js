@@ -28,43 +28,16 @@ app.set('view engine', 'ejs');
 
 app.use(express.static(path.join(__dirname, 'public')));
 
-
-router.get("/",(req,res)=>{
-    var totalItemsInCart = myShopping.collection("myshoppings");
-    totalItemsInCart.countDocuments({},function(err,count){
-            res.render("home",{itemsInCart:count});
-        })
-    
-})
-
-
-router.get("/addToCart/:productId",(req,res)=>{
-    let addNewProductTOCart=new addToCartModel({
-        productId:req.params.productId,
-        productName:req.query.pname,
-        productImage:req.query.pimage,
-        productPrice:req.query.pprice
-    }) 
-    addNewProductTOCart.save(function(){
-        res.redirect("back");
-    });
-})
-
 router.get("/checkout",(req,res)=>{
     let findProductInCart=addToCartModel.find();
-    findProductInCart.exec((err,data)=>{
-
-        res.render("checkout",{items:data});
-    })
+    findProductInCart.exec()
+        .then((data)=>{
+            res.render("checkout",{items:data});
+        })
+        .catch((err)=>{console.log(err.message)});
     
 })
 
-router.get("/deleteProduct/:productId",(req,res)=>{
-    let deleteProductFromCart=addToCartModel.findOneAndDelete({productId:req.params.productId});
-    deleteProductFromCart.exec(function(){
-        res.redirect("back")
-    });
-})
 
 var smtpTransport = nodemailer.createTransport({
     service: "Gmail",
